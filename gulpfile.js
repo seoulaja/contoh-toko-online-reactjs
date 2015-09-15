@@ -9,36 +9,38 @@ var less = require('gulp-less');
 var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 var source = require('vinyl-source-stream');
-var watchify = requie('watchify');
+var watchify = require('watchify');
+var errorify = require('errorify')
 
 // task untuk compile jsx ke javascript
 
 gulp.task('browserify', function(){
     var watcher = watchify(browserify({
-        entries: ['./src/Main.jsx'],
+        entries: './src/Main.jsx',
         transform: [reactify, babelify],
         debug: true,
         extensions: ['.jsx'],
         cache: {},
         fullPaths: true,
         packageCache: {}
-    }));
+    }).plugin(errorify));
 
     return watcher.on('update', function(){
         watcher.bundle()
             .pipe(source('build.js'))
-            .pipe(gulp.dest('./src'))
+            .pipe(gulp.dest('src'))
             .pipe(connect.reload())
+            console.log("compiled")
     }).bundle()
         .pipe(source('build.js'))
-        .pipe(gulp.dest('./src'));
+        .pipe(gulp.dest('src'));
 });
 
 // task untuk livereload
 
 gulp.task('connect', function(){
     connect.server({
-        root: 'public',
+        root: 'src',
         livereload: true
     })
 })
@@ -73,7 +75,7 @@ gulp.task('build', function(){
     .bundle()
         .pipe(source('build.min.js'))
         .pipe(streamify(uglify()))
-        .pipe(gulp.dest('./src'))
+        .pipe(gulp.dest('src'))
 });
 
 gulp.task('default', ['browserify', 'watchLess', 'connect']);
